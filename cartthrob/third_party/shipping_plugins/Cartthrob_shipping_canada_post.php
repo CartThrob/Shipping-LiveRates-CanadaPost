@@ -403,7 +403,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		$ratesAndServicesRequest->addChild('postalCode', $shipping_zip); 
 		
 		$data = (string) $eparcel->asXML(); 
-		$result =   new SimpleXMLElement($this->EE->cartthrob_shipping_plugins->curl_transaction($this->_host.":30000",$data)); 
+		$xml =   new SimpleXMLElement($this->EE->cartthrob_shipping_plugins->curl_transaction($this->_host.":30000",$data)); 
 		
 		if (  $xml->ratesAndServicesResponse[0]->statusCode  !=1)
 		{
@@ -462,69 +462,9 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		return $available_shipping; 
  	}
 	// END
- 	function shipping_methods($number = NULL, $prefix = NULL)
-	{
-		if (isset($this->prefix))
-		{
-			$prefix = $this->prefix; 
-		}
- 		if ($number)
-		{
-			if (array_key_exists($number, $this->shipping_methods))
-			{
-				return $this->shipping_methods[$number]; 
-			}
-			else
-			{
-				return "--"; 
-			}
-		}
-		foreach ($this->shipping_methods as $key => $method)
-		{
- 			if ($this->plugin_settings($prefix.$key) =="y")
-			{
-				$available_options[$key] = $method; 
-			}
- 
-		}
-		return $available_options; 
-	}
-	// END
-	public function plugin_shipping_options()
-	{
-		$options = array(); 
- 		// GETTING THE RATES FROM SESSION
-		$shipping_data =$this->core->cart->custom_data(ucfirst(get_class($this)));
-		
-		/*
- 		if (!$shipping_data)
-		{
-			// IF NONE ARE IN SESSION, WE WILL *TRY* TO GET RATES BASED ON CURRENT CART CONTENTS
-			$shipping_data = $this->get_live_rates(); 
-  		}
-		*/
- 		$shipping_data = $this->get_live_rates(); 
-		
- 		if (!empty($shipping_data['option_value'] ))
-		{
-			foreach ($shipping_data['option_value'] as $key => $value)
-			{
-				$options[] = array(
-					'rate_short_name' => $value,
-					'price' => $shipping_data['price'][$key],
-					'rate_price' => $shipping_data['price'][$key],
-					'rate_title' => $shipping_data['option_name'][$key],
-				);
-			}
- 		}
-		
-		return $options;
-	}
 	function get_shipping()
 	{
 		$cart_hash = $this->core->cart->custom_data('cart_hash'); 
-		
-		$this->cart_hash(); 
 		
  		if ($this->core->cart->count() <= 0 || $this->core->cart->shippable_subtotal() <= 0)
 		{
@@ -543,7 +483,10 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		}
 		
 		$shipping_data =$this->core->cart->custom_data(ucfirst(get_class($this)));
-		
+		if (empty($shipping_data['option_value']) && empty($shipping_data['price']))
+ 		{
+			$shipping_data = $this->get_live_rates(); 
+		}
 	 	if(!$this->core->cart->shipping_info('shipping_option'))
 		{
 			$temp_key = FALSE; 
@@ -591,6 +534,66 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			}
 		}
 		return 0; 
+	}
+ 	function shipping_methods($number = NULL, $prefix = NULL)
+	{
+		if (isset($this->prefix))
+		{
+			$prefix = $this->prefix; 
+		}
+ 		if ($number)
+		{
+			if (array_key_exists($number, $this->shipping_methods))
+			{
+				return $this->shipping_methods[$number]; 
+			}
+			else
+			{
+				return "--"; 
+			}
+		}
+		foreach ($this->shipping_methods as $key => $method)
+		{
+ 			if ($this->plugin_settings($prefix.$key) =="y")
+			{
+				$available_options[$key] = $method; 
+			}
+ 
+		}
+		return $available_options; 
+	}
+	// END
+	public function plugin_shipping_options()
+	{
+		$options = array(); 
+ 		// GETTING THE RATES FROM SESSION
+		$shipping_data =$this->core->cart->custom_data(ucfirst(get_class($this)));
+		$this->core->cart->save(); 
+		
+		/*
+ 		if (!$shipping_data)
+		{
+			// IF NONE ARE IN SESSION, WE WILL *TRY* TO GET RATES BASED ON CURRENT CART CONTENTS
+			$shipping_data = $this->get_live_rates(); 
+  		}
+		*/
+ 		$shipping_data = $this->get_live_rates(); 
+		
+ 		if (!empty($shipping_data['option_value'] ))
+		{
+			foreach ($shipping_data['option_value'] as $key => $value)
+			{
+				$options[] = array(
+					'rate_short_name' => $value,
+					'price' => $shipping_data['price'][$key],
+					'rate_price' => $shipping_data['price'][$key],
+					'rate_title' => $shipping_data['option_name'][$key],
+				);
+			}
+ 		}
+		
+		
+		return $options;
 	}
 	// creates a hash value to compare 
 	function cart_hash($shipping = NULL )
