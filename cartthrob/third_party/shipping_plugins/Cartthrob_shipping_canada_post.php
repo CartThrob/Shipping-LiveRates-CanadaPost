@@ -325,10 +325,10 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 	
 		$eparcel = new SimpleXMLElement("<eparcel></eparcel>");
 		
-		$eparcel->addChild('language', ($this->order('language')? $this->order('language') : "en") );
+		$eparcel->addChild('language', ( $this->core->cart->customer_info("language")  ? $this->core->cart->customer_info("language")  : "en") );
 		$ratesAndServicesRequest = $eparcel->addChild('ratesAndServicesRequest'); 
 		$ratesAndServicesRequest->addChild('merchantCPCID', $this->plugin_settings('access_key')  );
-		$ratesAndServicesRequest->addChild("fromPostalCode", $from_zip); 
+		$ratesAndServicesRequest->addChild("fromPostalCode", $orig_zip); 
 		$ratesAndServicesRequest->addChild("turnAroundTime", 
 					($this->plugin_settings('turnaround') ? 
 					$this->plugin_settings('turnaround') : 
