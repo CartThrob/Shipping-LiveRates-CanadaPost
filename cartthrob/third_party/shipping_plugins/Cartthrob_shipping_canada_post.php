@@ -404,7 +404,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		
 		$data = (string) $eparcel->asXML(); 
 		$xml =   new SimpleXMLElement($this->EE->cartthrob_shipping_plugins->curl_transaction($this->_host.":30000",$data)); 
-		if (  $xml->ratesAndServicesResponse[0]->statusCode  !=1)
+		if ( !empty($xml->ratesAndServicesResponse[0]->statusCode ) &&  $xml->ratesAndServicesResponse[0]->statusCode  !=1)
 		{
 			$shipping['error_message']	= (string) $xml->error[0]->statusMessage;
 			// update cart hash and shipping hash
@@ -413,6 +413,15 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			$this->core->cart->save(); 
 			
 			return $shipping;
+		}
+		elseif (strpos($xml, "<error>"))
+		{
+			$shipping['error_message']	= (string) $xml->error[0]->statusMessage;
+ 			$this->cart_hash($shipping); 
+ 			$this->core->cart->set_custom_data("shipping_error", $shipping['error_message']); 
+			$this->core->cart->save(); 
+			
+			return $shipping; 
 		}
 		
 		foreach ($xml->ratesAndServicesResponse[0]->product as $rating)
