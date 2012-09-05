@@ -276,9 +276,8 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
  		$this->core->cart->set_custom_data("shipping_error", ""); 
 		$this->core->cart->save(); 
 
- 		$orig_state = 	($this->plugin_settings('origination_state'))? $this->plugin_settings('origination_state') : $this->EE->cartthrob_shipping_plugins->customer_location_defaults('state') ;  
-		$orig_zip = 	($this->plugin_settings('origination_zip'))? $this->plugin_settings('origination_zip') : $this->EE->cartthrob_shipping_plugins->customer_location_defaults("zip");   
-		$orig_country_code = ($this->plugin_settings('orig_country_code'))? $this->EE->cartthrob_shipping_plugins->alpha2_country_code($this->plugin_settings('orig_country_code')) : $this->EE->cartthrob_shipping_plugins->alpha2_country_code($this->EE->cartthrob_shipping_plugins->customer_location_defaults("country_code")); 
+		$orig_zip = 	($this->plugin_settings('origination_postal_code'))? $this->plugin_settings('origination_postal_code') : $this->EE->cartthrob_shipping_plugins->customer_location_defaults("zip");   
+		$orig_country_code =  $this->EE->cartthrob_shipping_plugins->alpha2_country_code($this->EE->cartthrob_shipping_plugins->customer_location_defaults("country_code"), "CA"); 
   		$orig_res_com = ($this->plugin_settings('origination_res_com') == "RES")? 1: 0; 
 		$destination_res_com = ($this->plugin_settings('destination_res_com') == "RES")? 1: 0;
 
@@ -329,10 +328,10 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		$ratesAndServicesRequest = $eparcel->addChild('ratesAndServicesRequest'); 
 		$ratesAndServicesRequest->addChild('merchantCPCID', $this->plugin_settings('access_key')  );
 		$ratesAndServicesRequest->addChild("fromPostalCode", $orig_zip); 
-		$ratesAndServicesRequest->addChild("turnAroundTime", 
-					($this->plugin_settings('turnaround') ? 
-					$this->plugin_settings('turnaround') : 
-					"16")); 
+		$turn_around_time = preg_replace('[\D]', '', ($this->plugin_settings('turnaround') ? 
+		$this->plugin_settings('turnaround') : 
+		"16"));
+		$ratesAndServicesRequest->addChild("turnAroundTime", $turn_around_time); 
 
 		$ratesAndServicesRequest->addChild('itemsPrice', $this->core->cart->shippable_subtotal() ); 
 		
@@ -343,7 +342,8 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			$item = $lineItems->addChild('item'); 
 			
 			$item->addChild('quantity', '1');
-			$item->addChild('weight', ($this->core->cart->weight() ? $this->core->cart->weight() : 1 ));
+			#$item->addChild('weight', ($this->core->cart->weight() ? $this->core->cart->weight() : 1 ));
+			$item->addChild('weight',1);
 
 			if ( $this->plugin_settings('length_code') == "IN"  )
 			{
@@ -404,7 +404,6 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		
 		$data = (string) $eparcel->asXML(); 
 		$xml =   new SimpleXMLElement($this->EE->cartthrob_shipping_plugins->curl_transaction($this->_host.":30000",$data)); 
-		
 		if (  $xml->ratesAndServicesResponse[0]->statusCode  !=1)
 		{
 			$shipping['error_message']	= (string) $xml->error[0]->statusMessage;
@@ -464,7 +463,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 	// END
 	function get_shipping()
 	{
-		$cart_hash = $this->core->cart->custom_data('cart_hash'); 
+ 		$cart_hash = $this->core->cart->custom_data('cart_hash'); 
 		
  		if ($this->core->cart->count() <= 0 || $this->core->cart->shippable_subtotal() <= 0)
 		{
