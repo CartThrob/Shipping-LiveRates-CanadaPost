@@ -399,7 +399,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		
 		$ratesAndServicesRequest->addChild('city', $shipping_city ); 
 		$ratesAndServicesRequest->addChild('provOrState', $shipping_state ); 
-		$ratesAndServicesRequest->addChild('country', $this->EE->cartthrob_shipping_plugins->alpha2_country_code($shipping_state)); 
+		$ratesAndServicesRequest->addChild('country', $this->EE->cartthrob_shipping_plugins->alpha2_country_code($dest_country_code)); 
 		$ratesAndServicesRequest->addChild('postalCode', $shipping_zip); 
 		
 		$data = (string) $eparcel->asXML(); 
