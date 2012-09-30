@@ -414,7 +414,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			
 			return $shipping;
 		}
-		elseif (strpos($xml, "<error>"))
+		elseif (strpos( (string) $xml, "<error>"))
 		{
 			$shipping['error_message']	= (string) $xml->error[0]->statusMessage;
  			$this->cart_hash($shipping); 
