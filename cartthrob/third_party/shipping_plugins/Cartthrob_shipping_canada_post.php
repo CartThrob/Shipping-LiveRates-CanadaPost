@@ -157,8 +157,16 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 				'y' => 'Yes',
 				)
 		),
-
-		
+		array(
+			'name' => 'Priority',
+			'short_name' => 'Priority',
+			'type' => 'radio',
+			'default' => 'y',
+			'options' => array(
+				'n' => 'No',
+				'y' => 'Yes',
+				)
+		),
 		array(
 			'name' => 'Priority Worldwide USA',
 			'short_name' => 'Priority_Worldwide_USA',
@@ -258,6 +266,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		"Parcel Surface" 			=> "Parcel Surface",
 		"Priority Courier"			=> "Priority Courier",
 		"Expedited"					=> "Expedited",
+		"Priority"					=> "Priority",
 		"Xpresspost" 				=> "Xpresspost",
 		"XPressPost International" 	=> "XPressPost International",
 		"Priority Worldwide INTL"	=> "Priority Worldwide INTL",
@@ -423,6 +432,15 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			
 			return $shipping; 
 		}
+		elseif (is_object($xml->error[0]) && !empty($xml->error[0]->statusMessage))
+		{
+			$shipping['error_message']	= (string) $xml->error[0]->statusMessage;
+ 			$this->cart_hash($shipping); 
+ 			$this->core->cart->set_custom_data("shipping_error", $shipping['error_message']); 
+			$this->core->cart->save(); 
+			
+			return $shipping;
+		}
 		
 		foreach ($xml->ratesAndServicesResponse[0]->product as $rating)
 		{
@@ -437,7 +455,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		$available_shipping =array(); 
 		foreach ($shipping['option_value'] as $key => $value)
 		{
-			if ( $this->plugin_settings( $value) !="n" )
+			if ( $this->plugin_settings( $value) &&  $this->plugin_settings( $value) !="n" )
 			{
 				$available_shipping['price'][$key] 				= $shipping['price'][$key]; 
 				$available_shipping['option_value'][$key]		= $shipping['option_value'][$key]; 
@@ -467,7 +485,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		}
 		$this->core->cart->save(); 
 		
-		return $available_shipping; 
+ 		return $available_shipping; 
  	}
 	// END
 	function get_shipping()
@@ -493,7 +511,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 		$shipping_data =$this->core->cart->custom_data(ucfirst(get_class($this)));
 		if (empty($shipping_data['option_value']) && empty($shipping_data['price']))
  		{
-			$shipping_data = $this->get_live_rates(); 
+ 			$shipping_data = $this->get_live_rates(); 
 		}
 	 	if(!$this->core->cart->shipping_info('shipping_option'))
 		{
