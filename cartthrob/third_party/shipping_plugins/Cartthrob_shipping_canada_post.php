@@ -35,7 +35,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			'name' => 'Unit of Length Measurement',
 			'short_name' => 'length_code',
 			'type' => 'radio',
-			'default' => 'IN',
+			'default' => 'CM',
 			'options'	=> array(
 					'IN' => "Inches",
 					'CM' => "Centimeters"
@@ -351,8 +351,7 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			$item = $lineItems->addChild('item'); 
 			
 			$item->addChild('quantity', '1');
-			#$item->addChild('weight', ($this->core->cart->weight() ? $this->core->cart->weight() : 1 ));
-			$item->addChild('weight',1);
+			$item->addChild('weight', ($this->core->cart->shippable_weight() ? $this->core->cart->shippable_weight() : 1 ));
 
 			if ( $this->plugin_settings('length_code') == "IN"  )
 			{
@@ -362,12 +361,9 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 			}
 			else
 			{
-				if ( $this->plugin_settings('length_code') == "IN"  )
-				{
-					$item->addChild('length', $dim_length );
-					$item->addChild('width', $dim_width  );
-					$item->addChild('height', $dim_height );
-				}
+				$item->addChild('length', $dim_length );
+				$item->addChild('width', $dim_width  );
+				$item->addChild('height', $dim_height );
 			}
 			
 			$item->addChild('description', 'cart contents'); // @TODO lang
@@ -394,12 +390,9 @@ class Cartthrob_shipping_canada_post extends CartThrob_shipping
 				}
 				else
 				{
-					if ( $this->plugin_settings('length_code') == "IN"  )
-					{
-						$$var->addChild('length', $dim_length );
-						$$var->addChild('width', $dim_width );
-						$$var->addChild('height', $dim_height );
-					}
+					$$var->addChild('length', $dim_length );
+					$$var->addChild('width', $dim_width );
+					$$var->addChild('height', $dim_height );
 				}
 				$$var->addChild('description', $item['title']); // @TODO lang
 				$$var->addChild('readyToShip');
