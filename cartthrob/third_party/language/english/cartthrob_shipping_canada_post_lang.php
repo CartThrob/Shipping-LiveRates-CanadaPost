@@ -3,7 +3,7 @@
 $lang = array(
 	'canada_post_live_rates_title'		=> 'Canada Post',
 	'canada_post_live_rates_overview'	=> '<h3 style="display:block">Use of This Plugin</h3>
-	
+	<p>NOTE: You are required to have port 30000 open on your server to use Canada Post</p>
 	<p>LiveRates shipping costs are not updated automatically when the cart contents are modified. LiveRates shipping plugins requires that you manually request a shipping quote at some point during your checkout process. If you do not use the <a href="http://cartthrob.com/docs/tags_detail/get_shipping_options/index.html">{exp:cartthrob:get_shipping_options}</a> tag, your shipping costs may not be set for checkout.</p> 
 	
 		<p>For more details about this and other live rates plugins see: http://cartthrob.com/docs/tags_detail/get_live_rates_form/</p>
